@@ -30,15 +30,17 @@
 #if defined(__APPLE__)
 #include <libkern/OSByteOrder.h>
 #define htole16 OSSwapHostToLittleInt16
-#elif defined(__FreeBSD__)
+#elif defined(__OpenBSD__)
 #include <sys/endian.h>
 #else
 #include <endian.h>
 #endif
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__)
 #include <sys/types.h>
 #include <sys/mman.h>
-#include <net/ethernet.h>
+#include <net/if_arp.h>
+#include <netinet/in.h>
+#include <netinet/if_ether.h>
 #else
 #include <netinet/ether.h>
 #endif

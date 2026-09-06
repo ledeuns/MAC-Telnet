@@ -22,11 +22,12 @@
 #include <signal.h>
 #include <stdio.h>
 #include <arpa/inet.h>
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__)
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <net/ethernet.h>
+#include <net/if_arp.h>
 #include <netinet/in.h>
+#include <netinet/if_ether.h>
 #define ETH_FRAME_LEN ETHER_MAX_LEN
 #define ETH_ALEN ETHER_ADDR_LEN
 #else

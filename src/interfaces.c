@@ -17,7 +17,7 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include "config.h"
-#if defined(__FreeBSD__)
+#if defined(__OpenBSD__)
 #define __USE_BSD
 #define __FAVOR_BSD
 #endif
@@ -31,13 +31,16 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <ifaddrs.h>
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__)
 #include <netinet/in.h>
 #endif
 #include <netinet/ip.h>
 #include <netinet/udp.h>
-#if defined(__FreeBSD__) || defined(__APPLE__)
-#include <net/ethernet.h>
+#if defined(__OpenBSD__) || defined(__APPLE__)
+#include <net/if_arp.h>
+#include <netinet/in.h>
+#include <netinet/if_ether.h>
+
 #define ETH_FRAME_LEN (ETHER_MAX_LEN - ETHER_CRC_LEN)
 #define ETH_ALEN ETHER_ADDR_LEN
 #else
@@ -150,7 +153,7 @@ int net_get_interfaces(struct net_interface **interfaces) {
 	static const struct ifaddrs *ifaddrsp;
 	const struct sockaddr_in *dl_addr;
 	int found = 0;
-#if !defined(__FreeBSD__)
+#if !defined(__OpenBSD__)
 	uint32_t allones_bcast = htonl(INADDR_BROADCAST);
 #endif
 
@@ -176,7 +179,7 @@ int net_get_interfaces(struct net_interface **interfaces) {
 
 				if (ifaddrsp->ifa_addr->sa_family == AF_INET) {
 					memcpy(interface->ipv4_addr, &dl_addr->sin_addr, IPV4_ALEN);
-#if defined(__FreeBSD__)
+#if defined(__OpenBSD__)
 					memcpy(interface->bcast_addr, &((const struct sockaddr_in *)ifaddrsp->ifa_broadaddr)->sin_addr, IPV4_ALEN);
 #else
 					memcpy(interface->bcast_addr, &allones_bcast, IPV4_ALEN);
@@ -447,7 +450,7 @@ int net_send_udp(const int fd, struct net_interface *interface, const unsigned c
 	 */
 	static unsigned char stackbuf[ETH_FRAME_LEN];
 	void *buffer = (void *)&stackbuf;
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__)
 	struct ether_header *eh = (struct ether_header *)buffer;
 	struct ip *ip = (struct ip *)(buffer + 14);
 #else
@@ -473,7 +476,7 @@ int net_send_udp(const int fd, struct net_interface *interface, const unsigned c
 	}
 
 	/* Init ethernet header */
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__)
 	memcpy(eh->ether_shost, sourcemac, ETH_ALEN);
 	memcpy(eh->ether_dhost, destmac, ETH_ALEN);
 	eh->ether_type = htons(ETHERTYPE_IP);
@@ -498,7 +501,7 @@ int net_send_udp(const int fd, struct net_interface *interface, const unsigned c
 #endif
 
 	/* Init IP Header */
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__)
 	ip->ip_v = 4;
 	ip->ip_hl = 5;
 	ip->ip_tos = 0x10;
@@ -525,14 +528,14 @@ int net_send_udp(const int fd, struct net_interface *interface, const unsigned c
 #endif
 
 	/* Calculate checksum for IP header */
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__)
 	ip->ip_sum = in_cksum((unsigned short *)ip, sizeof(struct ip));
 #else
 	ip->check = in_cksum((unsigned short *)ip, sizeof(struct iphdr));
 #endif
 
 	/* Init UDP Header */
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__)
 	udp->uh_sport = htons(sourceport);
 	udp->uh_dport = htons(destport);
 	udp->uh_ulen = htons(sizeof(struct udphdr) + datalen);
@@ -548,7 +551,7 @@ int net_send_udp(const int fd, struct net_interface *interface, const unsigned c
 	memcpy(rest, data, datalen);
 
 	/* Add UDP checksum */
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__OpenBSD__) || defined(__APPLE__)
 	udp->uh_sum = udp_sum_calc((unsigned char *)&(ip->ip_src.s_addr), (unsigned char *)&(ip->ip_dst.s_addr),
 							   (unsigned char *)udp, sizeof(struct udphdr) + datalen);
 	udp->uh_sum = htons(udp->uh_sum);

@@ -23,9 +23,10 @@
 #include <signal.h>
 #include <unistd.h>
 #include <errno.h>
-#if defined(__FreeBSD__) || defined(__APPLE__)
-#include <net/ethernet.h>
+#if defined(__OpenBSD__) || defined(__APPLE__)
+#include <net/if_arp.h>
 #include <netinet/in.h>
+#include <netinet/if_ether.h>
 #include <sys/socket.h>
 #else
 #include <netinet/ether.h>

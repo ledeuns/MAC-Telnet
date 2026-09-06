@@ -1,3 +1,12 @@
+Fork to statically build mactelnet/macping on OpenBSD.
+
+In `src/Makefile` :
+```
+am__append_1 = -lintl -lpthread -liconv
+CC = cc -static
+CPPFLAGS = -I/usr/local/include -I/usr/local/include/eopenssl35
+```
+
 [![Build](https://github.com/haakonnessjoen/MAC-Telnet/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/haakonnessjoen/MAC-Telnet/actions/workflows/build.yaml)
 [![Docker release](https://github.com/haakonnessjoen/MAC-Telnet/actions/workflows/docker.yaml/badge.svg)](https://github.com/haakonnessjoen/MAC-Telnet/actions/workflows/docker.yaml)
 [![License: GPL v2+](https://img.shields.io/badge/License-GPL_v2%2b-blue)](https://github.com/haakonnessjoen/MAC-Telnet/blob/master/LICENSE)
